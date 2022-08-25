@@ -1,0 +1,43 @@
+{
+  "name": "web-demo",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.2.37"
+  },
+  "devDependencies": {
+    "@metamask/providers": "^9.1.0",
+    "@metamask/types": "^1.1.0",
+    "@typechain/ethers-v5": "^10.1.0",
+    "@typescript-eslint/eslint-plugin": "^5.35.1",
+    "@typescript-eslint/parser": "^5.35.1",
+    "@vitejs/plugin-vue": "^3.0.3",
+    "@vue/eslint-config-airbnb": "^7.0.0",
+    "@vue/eslint-config-prettier": "^7.0.0",
+    "@vue/eslint-config-typescript": "^11.0.0",
+    "@vueuse/core": "^9.1.1",
+    "buffer": "^6.0.3",
+    "eslint": "^8.22.0",
+    "eslint-import-resolver-typescript": "^3.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-vue": "^9.4.0",
+    "eslint-plugin-vuejs-accessibility": "^1.2.0",
+    "ethereum-types": "^3.7.1",
+    "ethers": "^5.7.0",
+    "postcss": "^8.4.16",
+    "postcss-html": "^1.5.0",
+    "postcss-jsx": "^0.36.4",
+    "postcss-syntax": "^0.36.2",
+    "sass": "^1.54.5",
+    "typescript": "^4.6.4",
+    "vite": "^3.0.7",
+    "vue-tsc": "^0.39.5"
+  }
+}
