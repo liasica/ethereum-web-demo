@@ -1,0 +1,5 @@
+src/compressor/png/png_compressor.js
+src/compressor/encoder
+node_modules/**
+public/**
+dist/**
