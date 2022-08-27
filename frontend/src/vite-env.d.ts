@@ -8,6 +8,7 @@ declare module '*.vue' {
 }
 
 declare type ECDHKeys = {
+  id?: string
   public: string
   private: string
   shared?: string

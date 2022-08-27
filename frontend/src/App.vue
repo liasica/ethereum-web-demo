@@ -3,9 +3,6 @@
     <button type="button" @click="onSignin">Signin With Metamask Wallet</button>
     <br>
     <br>
-    <button type="button" @click="onECDHGenerate">Generate ECDH Keys</button>
-    <br>
-    <br>
     <button type="button" @click="onGroupCreate">Create Group</button>
     <br>
     <br>
@@ -135,31 +132,24 @@ type GroupDetail = {
   public: boolean
 }
 
+type GroupJoinReq = {
+  groupId: string
+  sharedPublic: string // 用户公钥
+}
+
+// TODO: 公钥和私钥需要保存在本地数据库中，在用户进入任意群时都需要检查该群的私钥是否存在，如果不存在则需要请求替换
+// TODO: 一个群一个用户存一个key, 用户切换群或者浏览器时需要检查该群的key是否存在
 type GroupDetailWithPublicKey = GroupDetail & {
-  groupPublicKey: string
+  groupPublicKey: string // 待存储key
+  keyId: string // group key 存储标识
 }
 
 const headerMemberAddress = 'X-Member-Address'
 const headerSignature = 'X-Signature'
 const headerTimestamp = 'X-Timestamp'
 
-// TODO: 公钥和私钥需要保存在本地数据库中，在用户进入任意群时都需要检查该群的私钥是否存在，如果不存在则需要请求替换
-const ecdhKeys = ref<ECDHKeys>()
-const onECDHGenerate = async () => {
-  ecdhKeys.value = window.ecdhGenerate()
-  console.info(ecdhKeys.value)
-}
-
-const onGroupCreate = async () => {
-  // 生成私钥
-  await onECDHGenerate()
-  const req = {
-    name: '测试群组',
-    category: 'TEST',
-    maxMembers: 10,
-    sharedPublic: ecdhKeys.value?.public,
-  } as GroupCreateReq
-  const { data } = await useFetch('http://localhost:5501/group', {
+async function fetchSign<T> (payload: unknown, url: string): Promise<T | undefined> {
+  const { data } = await useFetch(url, {
     async beforeFetch ({ options, cancel }) {
       const body = options.body?.toString()
       if (!token.value || !address.value || !body) {
@@ -184,18 +174,42 @@ const onGroupCreate = async () => {
         options,
       }
     },
-  }).post(req).json<ApiResponse<GroupDetailWithPublicKey>>()
+  }).post(payload).json<ApiResponse<T>>()
+  return data.value?.data
+}
 
-  if (data.value && ecdhKeys.value) {
+const onGroupCreate = async () => {
+  // 生成私钥
+  const ecdhKeys = window.ecdhGenerate()
+  const req = {
+    name: '测试群组',
+    category: 'TEST',
+    maxMembers: 10,
+    sharedPublic: ecdhKeys.public,
+  } as GroupCreateReq
+  const res = await fetchSign<GroupDetailWithPublicKey>(req, 'http://localhost:5501/group')
+  if (res && ecdhKeys) {
+    ecdhKeys.id = res.keyId
     // 生成ECDH key
-    console.info(data.value.data, ecdhKeys.value.private)
-    ecdhKeys.value.shared = window.ecdhShare(data.value?.data.groupPublicKey, ecdhKeys.value.private)
-    // 需要存储 ecdhKeys
-    console.info(ecdhKeys.value)
+    console.info(res, ecdhKeys.private)
+    ecdhKeys.shared = window.ecdhShare(res.groupPublicKey, ecdhKeys.private)
+    // TODO: 需要存储 ecdhKeys
+    console.info(ecdhKeys)
   }
 }
 
-const onGroupJoin = async () => {}
+const onGroupJoin = async () => {
+  // 生成私钥
+  const ecdhKeys = window.ecdhGenerate()
+  const res = await fetchSign<GroupDetailWithPublicKey>({ groupId: '422915877898289152', sharedPublic: ecdhKeys.public } as GroupJoinReq, 'http://localhost:5501/group/join')
+  if (res && ecdhKeys) {
+    // 生成ECDH key
+    console.info(res, ecdhKeys.private)
+    ecdhKeys.shared = window.ecdhShare(res.groupPublicKey, ecdhKeys.private)
+    // TODO: 需要存储 ecdhKeys
+    console.info(ecdhKeys)
+  }
+}
 </script>
 
 <script lang="ts">
