@@ -4,7 +4,20 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Vue + TS</title>
+    <title>Web Demo</title>
+    <script src="/wasm_exec.js"></script>
+    <script>
+      // polyfill
+      if (!WebAssembly.instantiateStreaming) {
+          WebAssembly.instantiateStreaming = async (resp, importObject) => {
+            const source = await (await resp).arrayBuffer()
+            return await WebAssembly.instantiate(source, importObject)
+          }
+      }
+
+      const go = new Go()
+      WebAssembly.instantiateStreaming(fetch('/encryption.wasm'), go.importObject).then((result) => go.run(result.instance))
+    </script>
   </head>
   <body>
     <div id="app"></div>

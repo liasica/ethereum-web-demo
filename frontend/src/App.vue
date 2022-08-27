@@ -3,7 +3,13 @@
     <button type="button" @click="onSignin">Signin With Metamask Wallet</button>
     <br>
     <br>
+    <button type="button" @click="onECDHGenerate">Generate ECDH Keys</button>
+    <br>
+    <br>
     <button type="button" @click="onGroupCreate">Create Group</button>
+    <br>
+    <br>
+    <button type="button" @click="onGroupJoin">Join Group</button>
   </div>
 </template>
 
@@ -114,19 +120,44 @@ ethereum.on('accountsChanged', async params => {
 type GroupCreateReq = {
   name: string
   category: string
-  maxMembers: number,
+  maxMembers: number
   intro?: string
+  sharedPublic: string // 用户公钥
+}
+
+type GroupDetail = {
+  address: string
+  category: string
+  intro: string
+  membersMax: number
+  name: string
+  owner: boolean
+  public: boolean
+}
+
+type GroupDetailWithPublicKey = GroupDetail & {
+  groupPublicKey: string
 }
 
 const headerMemberAddress = 'X-Member-Address'
 const headerSignature = 'X-Signature'
 const headerTimestamp = 'X-Timestamp'
 
+// TODO: 公钥和私钥需要保存在本地数据库中，在用户进入任意群时都需要检查该群的私钥是否存在，如果不存在则需要请求替换
+const ecdhKeys = ref<ECDHKeys>()
+const onECDHGenerate = async () => {
+  ecdhKeys.value = window.ecdhGenerate()
+  console.info(ecdhKeys.value)
+}
+
 const onGroupCreate = async () => {
+  // 生成私钥
+  await onECDHGenerate()
   const req = {
     name: '测试群组',
     category: 'TEST',
     maxMembers: 10,
+    sharedPublic: ecdhKeys.value?.public,
   } as GroupCreateReq
   const { data } = await useFetch('http://localhost:5501/group', {
     async beforeFetch ({ options, cancel }) {
@@ -153,9 +184,18 @@ const onGroupCreate = async () => {
         options,
       }
     },
-  }).post(req).json()
-  console.info(data.value)
+  }).post(req).json<ApiResponse<GroupDetailWithPublicKey>>()
+
+  if (data.value && ecdhKeys.value) {
+    // 生成ECDH key
+    console.info(data.value.data, ecdhKeys.value.private)
+    ecdhKeys.value.shared = window.ecdhShare(data.value?.data.groupPublicKey, ecdhKeys.value.private)
+    // 需要存储 ecdhKeys
+    console.info(ecdhKeys.value)
+  }
 }
+
+const onGroupJoin = async () => {}
 </script>
 
 <script lang="ts">
