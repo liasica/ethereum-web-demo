@@ -4,8 +4,8 @@ export interface GroupKey {
   id: string
   groupId: string
   publicKey: string
-  privateKey: string
-  sharedKey: string
+  privateKey: string // 消息通过私钥解密
+  sharedKey: string // 通过用户私钥和群组公钥椭圆计算得出的共享密钥，所有消息都是用此密钥加密传输
 }
 
 export class GroupKeyDexie extends Dexie {

@@ -26,6 +26,7 @@ const testGroupId = '423032862455889920'
 const onSignin = async () => {
   await useAccount()
   await useMemberSignin(address.value)
+  // 测试，获取用户在该群的 groupKey
   const groupKey = await useKeyDB()?.getKey(testGroupId)
   console.info(groupKey)
 }

@@ -37,6 +37,8 @@ export const useApiFetch = (url: string, sign?: boolean) => createFetch({
           [headerMemberAddress]: address.value,
         }
       }
+
+      // 请求签名
       const body = options.body?.toString()
       if (options.method === 'POST' && sign && body) {
         // POST提交字符串 + 当前10位数字时间戳字符串
