@@ -7,12 +7,15 @@
     <br>
     <br>
     <button type="button" @click="onGroupJoin">Join Group</button>
+    <br>
+    <br>
+    <button type="button" @click="onGroupKeyShare">Share Key</button>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { Buffer } from 'buffer'
-import { useFetch } from '@vueuse/core'
+import { createFetch, useFetch } from '@vueuse/core'
 import { ref } from 'vue'
 import crypto from 'crypto-js'
 
@@ -100,7 +103,9 @@ const onSignin = async () => {
   console.info('token:', token.value)
 }
 
-const doSignout = () => {}
+const doSignout = () => {
+  token.value = ''
+}
 
 ethereum.on('accountsChanged', async params => {
   const accounts = params as string[]
@@ -139,55 +144,74 @@ type GroupJoinReq = {
 
 // TODO: 公钥和私钥需要保存在本地数据库中，在用户进入任意群时都需要检查该群的私钥是否存在，如果不存在则需要请求替换
 // TODO: 一个群一个用户存一个key, 用户切换群或者浏览器时需要检查该群的key是否存在
-type GroupDetailWithPublicKey = GroupDetail & {
+type GroupShareKey = {
   groupPublicKey: string // 待存储key
   keyId: string // group key 存储标识
 }
+
+type GroupDetailWithPublicKey = GroupDetail & GroupShareKey
 
 const headerMemberAddress = 'X-Member-Address'
 const headerSignature = 'X-Signature'
 const headerTimestamp = 'X-Timestamp'
 
-async function fetchSign<T> (payload: unknown, url: string): Promise<T | undefined> {
-  const { data } = await useFetch(url, {
-    async beforeFetch ({ options, cancel }) {
+const useApiFetch = (url: string, sign?: boolean) => createFetch({
+  baseUrl: 'http://localhost:5501',
+  options: {
+    async beforeFetch ({ options }) {
+      // 如果已登录
+      if (token.value) {
+        options.headers = {
+          ...options.headers,
+          Authorization: `Bearer ${token.value}`,
+          [headerMemberAddress]: address.value,
+        }
+      }
       const body = options.body?.toString()
-      if (!token.value || !address.value || !body) {
-        cancel()
-        return undefined
-      }
-      // POST提交字符串 + 当前10位数字时间戳字符串
-      const ts = Math.round(new Date().getTime() / 1000).toString()
-      const str = crypto.MD5(body).toString() + ts
-      const signature = await reqSignature(address.value, str)
-      console.info(`str: ${str}, signature: ${signature}`)
-
-      options.headers = {
-        ...options.headers,
-        Authorization: `Bearer ${token.value}`,
-        [headerMemberAddress]: address.value,
-        [headerSignature]: signature,
-        [headerTimestamp]: ts,
+      if (options.method === 'POST' && sign && body) {
+        // POST提交字符串 + 当前10位数字时间戳字符串
+        const ts = Math.round(new Date().getTime() / 1000).toString()
+        const str = crypto.MD5(body).toString() + ts
+        const signature = await reqSignature(address.value, str)
+        console.info(`str: ${str}, signature: ${signature}`)
+        options.headers = {
+          ...options.headers,
+          [headerSignature]: signature,
+          [headerTimestamp]: ts,
+        }
       }
 
-      return {
-        options,
-      }
+      return { options }
     },
-  }).post(payload).json<ApiResponse<T>>()
+  },
+  fetchOptions: {
+    mode: 'cors',
+  },
+})(url)
+
+const useApiGet = async <T, > (url: string): Promise<T | undefined> => {
+  const { data } = await useApiFetch(url).get().json<ApiResponse<T>>()
+  // TODO: 处理返回失败
+  console.info(data.value)
+  return data.value?.data
+}
+
+const useApiPost = async <T, P = unknown> (url: string, payload: P, sign?: boolean): Promise<T | undefined> => {
+  const { data } = await useApiFetch(url, sign).post(payload).json<ApiResponse<T>>()
+  // TODO: 处理返回失败
+  console.info(data.value)
   return data.value?.data
 }
 
 const onGroupCreate = async () => {
   // 生成私钥
   const ecdhKeys = window.ecdhGenerate()
-  const req = {
+  const res = await useApiPost<GroupDetailWithPublicKey, GroupCreateReq>('/group', {
     name: '测试群组',
     category: 'TEST',
     maxMembers: 10,
     sharedPublic: ecdhKeys.public,
-  } as GroupCreateReq
-  const res = await fetchSign<GroupDetailWithPublicKey>(req, 'http://localhost:5501/group')
+  }, true)
   if (res && ecdhKeys) {
     ecdhKeys.id = res.keyId
     // 生成ECDH key
@@ -201,12 +225,32 @@ const onGroupCreate = async () => {
 const onGroupJoin = async () => {
   // 生成私钥
   const ecdhKeys = window.ecdhGenerate()
-  const res = await fetchSign<GroupDetailWithPublicKey>({ groupId: '422915877898289152', sharedPublic: ecdhKeys.public } as GroupJoinReq, 'http://localhost:5501/group/join')
+  const res = await useApiPost<GroupDetailWithPublicKey, GroupJoinReq>('/group/join', { groupId: '423005774617247744', sharedPublic: ecdhKeys.public }, true)
   if (res && ecdhKeys) {
     // 生成ECDH key
     console.info(res, ecdhKeys.private)
     ecdhKeys.shared = window.ecdhShare(res.groupPublicKey, ecdhKeys.private)
+    ecdhKeys.id = res.keyId
     // TODO: 需要存储 ecdhKeys
+    console.info(ecdhKeys)
+  }
+}
+
+type GroupShareKeyReq = {
+  groupId: string
+  sharedPublic: string
+}
+
+const onGroupKeyShare = async () => {
+  // 生成私钥
+  const ecdhKeys = window.ecdhGenerate()
+  const res = await useApiPost<GroupShareKey, GroupShareKeyReq>('/group/key', { groupId: '423005774617247744', sharedPublic: ecdhKeys.public })
+  if (res && ecdhKeys) {
+    // TODO: 需要存储 ecdhKeys
+    console.info(res)
+    ecdhKeys.id = res.keyId
+    // 计算Key
+    ecdhKeys.shared = window.ecdhShare(res.groupPublicKey, ecdhKeys.private)
     console.info(ecdhKeys)
   }
 }
