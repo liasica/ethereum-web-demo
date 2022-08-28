@@ -1,3 +1,4 @@
+import { useKeyDB } from '@/composables/db'
 import { useApiPost } from './request'
 
 export interface GroupCreateReq {
@@ -9,6 +10,7 @@ export interface GroupCreateReq {
 }
 
 export interface GroupDetail {
+  id: string
   address: string
   category: string
   intro: string
@@ -35,17 +37,17 @@ export type GroupDetailWithPublicKey = GroupDetail & GroupShareKey
 export const useGroupCreate = async (req: GroupCreateReq): Promise<boolean> => {
   // 生成私钥
   const ecdhKeys = window.ecdhGenerate()
-  req.sharedPublic = ecdhKeys.public
+  console.info(ecdhKeys)
 
   // 请求建群
-  const res = await useApiPost<GroupDetailWithPublicKey, GroupCreateReq>('/group', req, true)
+  const res = await useApiPost<GroupDetailWithPublicKey, GroupCreateReq>('/group', { ...req, sharedPublic: ecdhKeys.publicKey }, true)
   if (res && ecdhKeys) {
-    ecdhKeys.id = res.keyId
     // 生成ECDH key
-    console.info(res, ecdhKeys.private)
-    ecdhKeys.shared = window.ecdhShare(res.groupPublicKey, ecdhKeys.private)
+    console.info(res, ecdhKeys)
+    const sharedKey = window.ecdhShare(res.groupPublicKey, ecdhKeys.privateKey)
     // TODO: 需要存储 ecdhKeys
-    console.info(ecdhKeys)
+    console.info(sharedKey)
+    useKeyDB()?.addKey(res.keyId, res.id, ecdhKeys.publicKey, ecdhKeys.privateKey, sharedKey)
     return true
   }
   return false
@@ -54,14 +56,14 @@ export const useGroupCreate = async (req: GroupCreateReq): Promise<boolean> => {
 export const useGroupJoin = async (groupId: string): Promise<boolean> => {
   // 生成私钥
   const ecdhKeys = window.ecdhGenerate()
-  const res = await useApiPost<GroupDetailWithPublicKey, GroupKeyReq>('/group/join', { groupId, sharedPublic: ecdhKeys.public }, true)
+  const res = await useApiPost<GroupDetailWithPublicKey, GroupKeyReq>('/group/join', { groupId, sharedPublic: ecdhKeys.publicKey }, true)
   if (res && ecdhKeys) {
     // 生成ECDH key
-    console.info(res, ecdhKeys.private)
-    ecdhKeys.shared = window.ecdhShare(res.groupPublicKey, ecdhKeys.private)
-    ecdhKeys.id = res.keyId
-    // TODO: 需要存储 ecdhKeys
-    console.info(ecdhKeys)
+    console.info(res, ecdhKeys)
+    // 计算并存储 ecdhKeys
+    const sharedKey = window.ecdhShare(res.groupPublicKey, ecdhKeys.privateKey)
+    console.info(sharedKey)
+    useKeyDB()?.addKey(res.keyId, res.id, ecdhKeys.publicKey, ecdhKeys.privateKey, sharedKey)
     return true
   }
   return false
@@ -70,14 +72,14 @@ export const useGroupJoin = async (groupId: string): Promise<boolean> => {
 export const useGroupKeyShare = async (groupId: string): Promise<boolean> => {
   // 生成私钥
   const ecdhKeys = window.ecdhGenerate()
-  const res = await useApiPost<GroupShareKey, GroupKeyReq>('/group/key', { groupId, sharedPublic: ecdhKeys.public })
+  const res = await useApiPost<GroupShareKey, GroupKeyReq>('/group/key', { groupId, sharedPublic: ecdhKeys.publicKey })
   if (res && ecdhKeys) {
-    // TODO: 需要存储 ecdhKeys
-    console.info(res)
-    ecdhKeys.id = res.keyId
-    // 计算Key
-    ecdhKeys.shared = window.ecdhShare(res.groupPublicKey, ecdhKeys.private)
-    console.info(ecdhKeys)
+    // 生成ECDH key
+    console.info(res, ecdhKeys)
+    // 计算并存储 ecdhKeys
+    const sharedKey = window.ecdhShare(res.groupPublicKey, ecdhKeys.privateKey)
+    console.info(sharedKey)
+    useKeyDB()?.addKey(res.keyId, groupId, ecdhKeys.publicKey, ecdhKeys.privateKey, sharedKey)
     return true
   }
   return false

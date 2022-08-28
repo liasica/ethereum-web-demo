@@ -8,13 +8,11 @@ declare module '*.vue' {
 }
 
 declare type ECDHKeys = {
-  id?: string
-  public: string
-  private: string
-  shared?: string
+  publicKey: string
+  privateKey: string
 }
 interface Window {
   ethereum: import('@metamask/providers').MetaMaskInpageProvider
   ecdhGenerate: () => ECDHKeys
-  ecdhShare: (othersPublic: string, private: string) => string
+  ecdhShare: (othersPublicKey: string, privateKey: string) => string
 }

@@ -14,15 +14,20 @@
 </template>
 
 <script lang="ts" setup>
-import { useAccount, useMemberSignin } from './composables/api/member'
-import { address, token } from './composables/member'
-import { GroupCreateReq, useGroupCreate, useGroupJoin, useGroupKeyShare } from './composables/api'
+import { useAccount, useMemberSignin } from '@/composables/api/member'
+import { address, token } from '@/composables/member'
+import { GroupCreateReq, useGroupCreate, useGroupJoin, useGroupKeyShare } from '@/composables/api'
+import { useKeyDB } from './composables/db'
 
 const { ethereum } = window
+
+const testGroupId = '423032862455889920'
 
 const onSignin = async () => {
   await useAccount()
   await useMemberSignin(address.value)
+  const groupKey = await useKeyDB()?.getKey(testGroupId)
+  console.info(groupKey)
 }
 
 const doSignout = () => {
@@ -50,11 +55,11 @@ const onGroupCreate = async () => {
 }
 
 const onGroupJoin = async () => {
-  await useGroupJoin('423005774617247744')
+  await useGroupJoin(testGroupId)
 }
 
 const onGroupKeyShare = async () => {
-  await useGroupKeyShare('423005774617247744')
+  await useGroupKeyShare(testGroupId)
 }
 </script>
 
