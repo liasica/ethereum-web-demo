@@ -8,6 +8,15 @@ declare type SigninReq = {
   nonce: string
 }
 
+declare type Profile = {
+  id: string
+  address: string
+  nickname?: string
+  avatar?: string
+  intro?: string
+}
+
 declare type SigninRes = {
   token: string
+  profile: Profile
 }

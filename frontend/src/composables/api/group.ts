@@ -63,3 +63,15 @@ export const useGroupKeyShare = async (groupId: string): Promise<boolean> => {
   }
   return false
 }
+
+/**
+ * 设置当前使用的群组keys
+ * :::注意:::
+ * 0.接口应该在socket连接成功后<立即>请求
+ * 1.获取所有用户已加入的groups
+ * 2.获取本地的group keys (若本地未保存keys则需要请求useGroupKeyShare创建keys)
+ * 3.将所有的key提交到服务器 (useGroupKeyUsed)
+ * @param data 当前使用的群组keys
+ * @returns void
+ */
+export const useGroupKeyUsed = async (data: GroupKeyUsedReq) => useApiPost('/group/key/used', data)

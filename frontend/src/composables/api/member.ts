@@ -1,5 +1,4 @@
 import { memberStore } from '@/store'
-import { NonceRes, SigninReq, SigninRes } from '@/types'
 import { useApiGet, useApiPost, useWalletSignature } from './request'
 
 export const useAccount = async (): Promise<boolean> => {
@@ -39,6 +38,7 @@ export const useMemberSignin = async (address: string): Promise<boolean> => {
   // TODO: 处理失败逻辑
   if (res?.token) {
     store.token = res.token
+    store.profile = res.profile
     return true
   }
   return false

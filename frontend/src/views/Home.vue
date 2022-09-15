@@ -20,14 +20,14 @@ const { ethereum } = window
 const store = memberStore()
 const router = useRouter()
 
-// TODO: 测试groupID
+// TODO: 测试groupId
 const testGroupId = '425310913260683264'
 
 const onSignin = async () => {
   await useAccount()
   await useMemberSignin(store.address)
   console.info(store.token)
-  // 测试，获取用户在该群的 groupKey
+  // 获取用户在该群的 groupKey
   const groupKey = await useKeyDB()?.getKey(testGroupId)
   console.info(groupKey)
 }

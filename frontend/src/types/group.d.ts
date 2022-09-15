@@ -30,3 +30,12 @@ declare type GroupShareKey = {
 }
 
 declare type GroupDetailWithPublicKey = GroupDetail & GroupShareKey
+
+declare type GroupKeyUsed = {
+  groupId: string
+  keyId: string
+}
+
+declare type GroupKeyUsedReq = {
+  keys: GroupKeyUsed[]
+}

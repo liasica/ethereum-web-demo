@@ -17,9 +17,10 @@ import { watch } from 'vue'
 import { Message, Operate } from '@/message'
 import { InputSearch } from '@arco-design/web-vue'
 import { useKeyDB } from '@/composables/db'
+import { useGroupKeyUsed, useMessageCreate } from '@/composables/api'
 
 const store = memberStore()
-// TODO: 测试groupID
+// TODO: 测试groupId
 const testGroupId = '425310913260683264'
 
 const { send, status, data } = useWebSocket<Blob>(`${import.meta.env.VITE_WEBSOCKET_URL}/${store.address}`, {
@@ -43,23 +44,55 @@ const onSubmit = async (value: string) => {
     console.info(`encrypted data: ${b64}`)
     const data = window.ecdhDecrypt(groupKey.sharedKey, b64)
     console.info(`decrypted data: ${data}`)
+    // send message
+    await useMessageCreate({ groupId: testGroupId, memberId: store.profile.id, keyId: groupKey.id, content: b64 })
+  }
+}
+
+const clientRegister = async () => {
+  // TODO: 需要提交所有的群组
+  // 提交群组keys
+  const groupKey = await useKeyDB()?.getKey(testGroupId)
+  if (groupKey) {
+    // 设置当前使用的key
+    await useGroupKeyUsed({ keys: [{ groupId: testGroupId, keyId: groupKey.id }] })
+  }
+}
+
+const parseChatMessage = async (message: ChatMessage) => {
+  // 获取群组key
+  const groupKey = await useKeyDB()?.getKey(message.groupId)
+  if (groupKey) {
+  // 解密消息
+    const data = window.ecdhDecrypt(groupKey.sharedKey, message.content)
+    console.info(`decrypted received message content: ${data}`)
   }
 }
 
 watch(
   () => data.value,
   async v => {
-    if (v) {
+    if (v && v.size > 0) {
       // TODO: 处理消息
       const data = await Message.fromBlob(v)
       console.info('WebSocket received message:', data)
+      switch (data.operate) {
+        case Operate.Register:
+          await clientRegister()
+          break
+        case Operate.Chat:
+          await parseChatMessage(data.data as ChatMessage)
+          break
+        default:
+          break
+      }
     }
   },
 )
 
 watch(
   () => status.value,
-  v => {
+  async v => {
     console.info(`WebSocket: ${v}`)
     switch (v) {
       case 'OPEN':

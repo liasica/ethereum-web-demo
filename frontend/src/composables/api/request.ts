@@ -2,7 +2,6 @@ import { createFetch } from '@vueuse/core'
 import crypto from 'crypto-js'
 import { Buffer } from 'buffer'
 import { memberStore } from '@/store'
-import { ApiResponse } from '@/types'
 import { headerMemberAddress, headerSignature, headerTimestamp } from './header'
 
 export const baseUrl = import.meta.env.VITE_BASE_API_URL
@@ -31,6 +30,7 @@ export const useApiFetch = (url: string, sign?: boolean) => createFetch({
           ...options.headers,
           Authorization: `Bearer ${store.token}`,
           [headerMemberAddress]: store.address,
+          'Content-Type': 'application/json',
         }
       }
 
