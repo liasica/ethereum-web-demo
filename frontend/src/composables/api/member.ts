@@ -1,28 +1,16 @@
-import { address, token } from '../member'
+import { memberStore } from '@/store'
+import { NonceRes, SigninReq, SigninRes } from '@/types'
 import { useApiGet, useApiPost, useWalletSignature } from './request'
 
-export interface NonceRes {
-  nonce: string
-}
-
-export interface SigninReq {
-  address: string
-  signature: string
-  nonce: string
-}
-
-export interface SigninRes {
-  token: string
-}
-
 export const useAccount = async (): Promise<boolean> => {
+  const store = memberStore()
   const accounts = (await window.ethereum.request<string[]>({ method: 'eth_requestAccounts' }) as string[])
   if (accounts?.length === 0) {
     // TODO: 处理登录失败
     return false
   }
-  address.value = accounts[0] as string
-  console.info('address:', address.value)
+  store.address = accounts[0] as string
+  console.info('address:', store.address)
   return true
 }
 
@@ -47,9 +35,10 @@ export const useMemberSignin = async (address: string): Promise<boolean> => {
   }
 
   const res = await useApiPost<SigninRes, SigninReq>('/member', { address, nonce, signature })
+  const store = memberStore()
   // TODO: 处理失败逻辑
   if (res?.token) {
-    token.value = res.token
+    store.token = res.token
     return true
   }
   return false

@@ -11,8 +11,16 @@ declare type ECDHKeys = {
   publicKey: string
   privateKey: string
 }
+
 interface Window {
   ethereum: import('@metamask/providers').MetaMaskInpageProvider
   ecdhGenerate: () => ECDHKeys
   ecdhShare: (othersPublicKey: string, privateKey: string) => string
+  ecdhEncrypt: (sharedKey: string, data: string) => string
+  ecdhDecrypt: (privateKey: string, data: string) => string
+}
+
+interface ImportMetaEnv {
+  VITE_BASE_API_URL: string
+  VITE_WEBSOCKET_URL: string
 }

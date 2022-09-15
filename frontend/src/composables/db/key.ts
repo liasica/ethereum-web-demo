@@ -22,7 +22,12 @@ export class GroupKeyDexie extends Dexie {
     })
   }
 
-  addKey (id: string, groupId: string, publicKey: string, privateKey: string, sharedKey: string) {
+  async addKey (id: string, groupId: string, publicKey: string, privateKey: string, sharedKey: string) {
+    // if group id exists, delete it first
+    const exists = await this.getKey(groupId)
+    if (exists) {
+      await this.keys.delete(exists.id)
+    }
     this.keys.add({ id, groupId, publicKey, privateKey, sharedKey })
   }
 

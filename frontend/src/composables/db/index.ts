@@ -1,9 +1,10 @@
-import { address } from '@/composables/member'
+import { memberStore } from '@/store'
 import { GroupKeyDexie } from './key'
 
 export const useKeyDB = (): GroupKeyDexie | undefined => {
-  if (address.value) {
-    const db = new GroupKeyDexie(address.value)
+  const store = memberStore()
+  if (store.address) {
+    const db = new GroupKeyDexie(store.address)
     return db
   }
   return undefined
