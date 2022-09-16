@@ -45,7 +45,7 @@ const onSubmit = async (value: string) => {
     const data = window.ecdhDecrypt(groupKey.sharedKey, b64)
     console.info(`decrypted data: ${data}`)
     // send message
-    await useMessageCreate({ groupId: testGroupId, memberId: store.profile.id, keyId: groupKey.id, content: b64 })
+    await useMessageCreate({ groupId: testGroupId, memberId: store.profile.id, content: b64 })
   }
 }
 
