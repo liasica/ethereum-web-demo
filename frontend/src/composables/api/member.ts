@@ -8,7 +8,7 @@ export const useAccount = async (): Promise<boolean> => {
     // TODO: 处理登录失败
     return false
   }
-  store.address = accounts[0] as string
+  store.profile.address = accounts[0] as string
   console.info('address:', store.address)
   return true
 }

@@ -1,18 +1,18 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 export const memberStore = defineStore('counter', () => {
   // TODO: 测试数据需要删除
-  const address = ref('0xf8fc2203874a6a97f9139d4ff05fb84a32497334')
-  const token = ref('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIweGY4ZmMyMjAzODc0YTZhOTdmOTEzOWQ0ZmYwNWZiODRhMzI0OTczMzQiLCJzdWIiOiIweGY4ZmMyMjAzODc0YTZhOTdmOTEzOWQ0ZmYwNWZiODRhMzI0OTczMzQiLCJleHAiOjE2NjMzNDU4NjQsImlhdCI6MTY2MzI1OTQ2NH0.IInS6xZ7Nm-_6GDriDbyWFAU936zFG4BeHk9kua1xig')
+  const token = ref(import.meta.env.VITE_TEST_MEMBER_TOKEN || '')
 
   const profile = ref({
-    id: '425456631317266432',
-    address: '0xf8fc2203874a6a97f9139d4ff05fb84a32497334',
+    id: import.meta.env.VITE_TEST_MEMBER_ID || '',
+    address: import.meta.env.VITE_TEST_MEMBER_ADDRESS || '',
   } as Profile)
 
+  const address = computed(() => profile.value.address)
+
   const $reset = () => {
-    address.value = ''
     token.value = ''
     profile.value = {
       id: '',
@@ -20,5 +20,5 @@ export const memberStore = defineStore('counter', () => {
     }
   }
 
-  return { address, profile, token, $reset }
+  return { profile, token, address, $reset }
 })

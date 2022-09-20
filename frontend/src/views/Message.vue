@@ -21,7 +21,7 @@ import { useGroupKeyUsed, useMessageCreate } from '@/composables/api'
 
 const store = memberStore()
 // TODO: 测试groupId
-const testGroupId = '425310913260683264'
+const testGroupId = import.meta.env.VITE_TEST_GROUP_ID
 
 const { send, status, data } = useWebSocket<Blob>(`${import.meta.env.VITE_WEBSOCKET_URL}/${store.address}`, {
   heartbeat: {

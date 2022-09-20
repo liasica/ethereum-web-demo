@@ -21,7 +21,7 @@ const store = memberStore()
 const router = useRouter()
 
 // TODO: 测试groupId
-const testGroupId = '425310913260683264'
+const testGroupId = import.meta.env.VITE_TEST_GROUP_ID
 
 const onSignin = async () => {
   await useAccount()

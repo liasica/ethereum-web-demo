@@ -23,4 +23,8 @@ interface Window {
 interface ImportMetaEnv {
   VITE_BASE_API_URL: string
   VITE_WEBSOCKET_URL: string
+  VITE_TEST_MEMBER_ID: string
+  VITE_TEST_MEMBER_TOKEN: string
+  VITE_TEST_GROUP_ID: string
+  VITE_TEST_MEMBER_ADDRESS: string
 }
