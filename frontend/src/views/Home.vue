@@ -1,6 +1,7 @@
 <template>
   <Space direction="vertical" size="large">
     <Button @click="onSignin">Signin With Metamask Wallet</Button>
+    <Button @click="onJoinedGroupList">List Joined Group</Button>
     <Button @click="onGroupCreate">Create Group</Button>
     <Button @click="onGroupJoin">Join Group</Button>
     <Button @click="onGroupKeyShare">Share Key</Button>
@@ -10,7 +11,7 @@
 
 <script lang="ts" setup>
 import { useAccount, useMemberSignin } from '@/composables/api/member'
-import { useGroupCreate, useGroupJoin, useGroupKeyShare } from '@/composables/api'
+import { useGroupCreate, useGroupJoin, useGroupKeyShare, useJoinedGroupList } from '@/composables/api'
 import { useKeyDB } from '@/composables/db'
 import { memberStore } from '@/store/index'
 import { Button, Space } from '@arco-design/web-vue'
@@ -47,6 +48,11 @@ ethereum.on('accountsChanged', async params => {
   // TODO: 弹窗提示用户使用新钱包登录
   // onSignin()
 })
+
+const onJoinedGroupList = async () => {
+  const groups = await useJoinedGroupList()
+  console.info(groups)
+}
 
 const onGroupCreate = async () => {
   await useGroupCreate({

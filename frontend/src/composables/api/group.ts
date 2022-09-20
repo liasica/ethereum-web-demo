@@ -1,5 +1,5 @@
 import { useKeyDB } from '@/composables/db'
-import { useApiPost } from './request'
+import { useApiGet, useApiPost } from './request'
 
 // 创建群
 export const useGroupCreate = async (req: GroupCreateReq): Promise<boolean> => {
@@ -75,3 +75,5 @@ export const useGroupKeyShare = async (groupId: string): Promise<boolean> => {
  * @returns void
  */
 export const useGroupKeyUsed = async (data: GroupKeyUsedReq) => useApiPost('/group/key/used', data)
+
+export const useJoinedGroupList = async () => useApiGet<GroupDetail[]>('/group/joined')
