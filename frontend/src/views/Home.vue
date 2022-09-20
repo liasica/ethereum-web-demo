@@ -1,6 +1,8 @@
 <template>
   <Space direction="vertical" size="large">
     <Button @click="onSignin">Signin With Metamask Wallet</Button>
+    <Button @click="onJoinedGroupList">List Group Categories</Button>
+    <Button @click="onJoinedGroupList">List Groups</Button>
     <Button @click="onJoinedGroupList">List Joined Group</Button>
     <Button @click="onGroupCreate">Create Group</Button>
     <Button @click="onGroupJoin">Join Group</Button>
