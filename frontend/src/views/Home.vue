@@ -1,7 +1,7 @@
 <template>
   <Space direction="vertical" size="large">
     <Button @click="onSignin">Signin With Metamask Wallet</Button>
-    <Button @click="onJoinedGroupList">List Group Categories</Button>
+    <Button @click="onGroupCategories">List Group Categories</Button>
     <Button @click="onGroupDetail">Group Detail</Button>
     <Button @click="onGroupList">List Groups</Button>
     <Button @click="onJoinedGroupList">List Joined Group</Button>
@@ -14,7 +14,7 @@
 
 <script lang="ts" setup>
 import { useAccount, useMemberSignin } from '@/composables/api/member'
-import { useGroupCreate, useGroupDetail, useGroupJoin, useGroupKeyShare, useGroupList, useJoinedGroupList } from '@/composables/api'
+import { useGroupCategories, useGroupCreate, useGroupDetail, useGroupJoin, useGroupKeyShare, useGroupList, useJoinedGroupList } from '@/composables/api'
 import { useKeyDB } from '@/composables/db'
 import { memberStore } from '@/store/index'
 import { Button, Space } from '@arco-design/web-vue'
@@ -55,6 +55,11 @@ ethereum.on('accountsChanged', async params => {
 const onJoinedGroupList = async () => {
   const groups = await useJoinedGroupList()
   console.info(groups)
+}
+
+const onGroupCategories = async () => {
+  const categories = await useGroupCategories()
+  console.info(categories)
 }
 
 const onGroupDetail = async () => {

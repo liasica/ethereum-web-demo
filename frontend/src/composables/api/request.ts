@@ -60,13 +60,11 @@ export const useApiFetch = (url: string, sign?: boolean) => createFetch({
 export const useApiGet = async <T> (url: string): Promise<T | undefined> => {
   const { data } = await useApiFetch(url).get().json<ApiResponse<T>>()
   // TODO: 处理返回失败
-  console.info(data.value)
   return data.value?.data
 }
 
 export const useApiPost = async <T, P = unknown> (url: string, payload: P, sign?: boolean): Promise<T | undefined> => {
   const { data } = await useApiFetch(url, sign).post(payload).json<ApiResponse<T>>()
   // TODO: 处理返回失败
-  console.info(data.value)
   return data.value?.data
 }

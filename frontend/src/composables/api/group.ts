@@ -104,3 +104,5 @@ export const useGroupList = async (req?: GroupListReq): Promise<ApiPaginationRes
  * @returns 群组详情
  */
 export const useGroupDetail = async (id: string): Promise<GroupDetail | undefined> => useApiGet<GroupDetail>(`/group/${id}`)
+
+export const useGroupCategories = async (): Promise<string[] | undefined> => useApiGet('/group/categories')
