@@ -57,7 +57,7 @@ export const useApiFetch = (url: string, sign?: boolean) => createFetch({
   },
 })(url)
 
-export const useApiGet = async <T, > (url: string): Promise<T | undefined> => {
+export const useApiGet = async <T> (url: string): Promise<T | undefined> => {
   const { data } = await useApiFetch(url).get().json<ApiResponse<T>>()
   // TODO: 处理返回失败
   console.info(data.value)

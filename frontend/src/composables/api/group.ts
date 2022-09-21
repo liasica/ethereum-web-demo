@@ -76,4 +76,31 @@ export const useGroupKeyShare = async (groupId: string): Promise<boolean> => {
  */
 export const useGroupKeyUsed = async (data: GroupKeyUsedReq) => useApiPost('/group/key/used', data)
 
+/**
+ * 获取所有已加入群组
+ * @returns 已加入的全部群组详情
+ */
 export const useJoinedGroupList = async () => useApiGet<GroupDetail[]>('/group/joined')
+
+/**
+ * 分页筛选群组
+ * @param req 分页和筛选数据
+ * @returns 群组分页列表
+ */
+export const useGroupList = async (req?: GroupListReq): Promise<ApiPaginationRes<GroupListRes> | undefined> => {
+  let query = ''
+  if (req) {
+    const searchParams = new URLSearchParams()
+    const keys = Object.keys(req) as (keyof typeof req)[]
+    keys.forEach(key => searchParams.append(key, `${req[key]}`))
+    query = `?${searchParams.toString()}`
+  }
+  return useApiGet<ApiPaginationRes<GroupListRes>>(`/group${query}`)
+}
+
+/**
+ * 获取已加入的群组详情
+ * @param id 群组ID
+ * @returns 群组详情
+ */
+export const useGroupDetail = async (id: string): Promise<GroupDetail | undefined> => useApiGet<GroupDetail>(`/group/${id}`)

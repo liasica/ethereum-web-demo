@@ -6,13 +6,17 @@ declare type GroupCreateReq = {
   sharedPublic: string // 用户公钥
 }
 
-declare type GroupDetail = {
+declare type GroupMeta = {
   id: string
+  name: string
   address: string
   category: string
   intro: string
   membersMax: number
-  name: string
+  membersCount: number
+}
+
+declare type GroupDetail = GroupMeta & {
   owner: boolean
   public: boolean
 }
@@ -38,4 +42,13 @@ declare type GroupKeyUsed = {
 
 declare type GroupKeyUsedReq = {
   keys: GroupKeyUsed[]
+}
+
+declare type GroupListRes = GroupMeta & {
+  joined: boolean
+}
+
+declare type GroupListReq = ApiPaginationReq & {
+  name?: string
+  category?: string
 }
