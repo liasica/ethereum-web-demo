@@ -63,9 +63,10 @@ const parseChatMessage = async (message: ChatMessage) => {
   // 获取群组key
   const groupKey = await useKeyDB()?.getKey(message.groupId)
   if (groupKey) {
-  // 解密消息
+    // 解密消息
+    console.info(`received message encrypted: ${message.content}`)
     const data = window.ecdhDecrypt(groupKey.sharedKey, message.content)
-    console.info(`decrypted received message content: ${data}`)
+    console.info(`received message decrypted: ${data}`)
   }
 }
 
